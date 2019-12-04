@@ -23,13 +23,14 @@ int main(int argc, char const *argv[])
 {
 	struct sockaddr_in server_addr, client_addr;
 	socklen_t sin_len = sizeof(client_addr);
-	int fd_server, fd_client;
+	int fdimg, fd_server, fd_client;
 	char buf[2048];
-	int fdimg;
 	int on =1;
-	int pid = fork();
+	int pid;
 
+	pid = fork();
 	fd_server = socket(AF_INET, SOCK_STREAM, 0);
+	
 	if(fd_server < 0)
 	{
 		perror("socket");
