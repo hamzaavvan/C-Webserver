@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/sendfile.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -11,6 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <regex.h>
+#include <pthread.h>
 
 #define req_len 2048
 
@@ -21,6 +21,11 @@ struct ext
 {
 	char name[100];
 	char value[100];
+};
+struct process {
+		char *i;
+		int  j;
+		char *k;
 };
 
 // List of server's supported extensions 
@@ -109,6 +114,7 @@ void prepare_response(int client, char file[]) {
 
 void process_request(char req[req_len], int fd_client, char path[]) {
 	char *token = strtok(req, "\n\r");
+	struct process *my_proc = (struct process*)my_proc;
 
 	char header[HEADER_SZ];
 	strcpy(header, token);
@@ -134,6 +140,7 @@ int main(int argc, char const *argv[])
 	int fdimg, fd_server, fd_client;
 	char req[req_len], path[100] = ".";
 	int on = 1, port;
+	 struct process *proc;
 
 	fd_server = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -189,7 +196,14 @@ int main(int argc, char const *argv[])
 			read(fd_client, req, 2047);
 
 			printf("%s\n", req);
-			process_request(req, fd_client, path);
+			//process_request(req, fd_client, path);
+			pthread_t id;
+			proc = malloc(sizeof(struct process));
+			(*proc).i = req;
+			(*proc).j = fd_client;
+			(*proc).k = path;
+			pthread_create(&id, NULL,process_request, (void*) proc);
+			pthread_join(id, NULL);
 					
 			// printf("closing\n");
 			
