@@ -1,0 +1,1 @@
+alert("Javascript file loaded: 1")

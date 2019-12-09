@@ -113,13 +113,14 @@ void prepare_response(int client, char file[]) {
 }
 
 void *process_request(void*arg) {
-	struct process *my_proc = (struct process*)my_proc;
+	struct process *my_proc = (struct process*)arg;
 	int fd_client = my_proc->fd_client;
-	char req[] = " ";
-	char path[] = " ";
+	char req[req_len];
+	char path[1000];
 
 	strcpy(req, (*my_proc).request);
 	strcpy(path, (*my_proc).path);
+
 	char *token = strtok(req, "\n\r");
 
 	char header[HEADER_SZ];
@@ -169,6 +170,7 @@ int main(int argc, char const *argv[])
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(port);
+	pthread_t id;
 
 	if(bind(fd_server, (struct sockaddr *) &server_addr, sizeof(server_addr)) == -1)
 	{
@@ -202,15 +204,18 @@ int main(int argc, char const *argv[])
 			read(fd_client, req, 2047);
 
 			printf("%s\n", req);
+			
 			//process_request(req, fd_client, path);
-			pthread_t id;
+			
 			proc = malloc(sizeof(struct process));
 			(*proc).request = req;
 			proc->fd_client = fd_client;
 			(*proc).path = path;
+			
 			pthread_create(&id, NULL,&process_request, (void*) proc);
 			pthread_join(id, NULL);
-					
+			
+			free(proc);
 			// printf("closing\n");
             exit(0);		
 		}
