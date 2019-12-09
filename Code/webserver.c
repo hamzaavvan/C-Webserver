@@ -23,9 +23,9 @@ struct ext
 	char value[100];
 };
 struct process {
-		char *i;
-		int  j;
-		char *k;
+		char *request;
+		int  fd_client;
+		char *path;
 };
 
 // List of server's supported extensions 
@@ -112,9 +112,15 @@ void prepare_response(int client, char file[]) {
 	write(client, content, fsize);
 }
 
-void process_request(char req[req_len], int fd_client, char path[]) {
-	char *token = strtok(req, "\n\r");
+void *process_request(void*arg) {
 	struct process *my_proc = (struct process*)my_proc;
+	int fd_client = my_proc->fd_client;
+	char req[] = " ";
+	char path[] = " ";
+
+	strcpy(req, (*my_proc).request);
+	strcpy(path, (*my_proc).path);
+	char *token = strtok(req, "\n\r");
 
 	char header[HEADER_SZ];
 	strcpy(header, token);
@@ -199,15 +205,14 @@ int main(int argc, char const *argv[])
 			//process_request(req, fd_client, path);
 			pthread_t id;
 			proc = malloc(sizeof(struct process));
-			(*proc).i = req;
-			(*proc).j = fd_client;
-			(*proc).k = path;
-			pthread_create(&id, NULL,process_request, (void*) proc);
+			(*proc).request = req;
+			proc->fd_client = fd_client;
+			(*proc).path = path;
+			pthread_create(&id, NULL,&process_request, (void*) proc);
 			pthread_join(id, NULL);
 					
 			// printf("closing\n");
-			
-			exit(0);		
+            exit(0);		
 		}
 		close(fd_client);
 	}
