@@ -17,15 +17,16 @@
 #define HEADER_SZ 500
 #define STATUS_SZ 20
 
-struct ext
-{
-	char name[100];
-	char value[100];
-};
 struct process {
 		char *request;
 		int  fd_client;
 		char *path;
+};
+
+struct ext
+{
+	char name[100];
+	char value[100];
 };
 
 // List of server's supported extensions 
@@ -166,7 +167,7 @@ int main(int argc, char const *argv[])
 		exit(1);
 	}
 	
-	setsockopt(fd_server, SOL_SOCKET, SO_REUSEADDR,&on, sizeof(int));
+	setsockopt(fd_server, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(port);
